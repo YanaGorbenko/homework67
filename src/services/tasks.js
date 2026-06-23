@@ -49,7 +49,7 @@ export const getTasksService = async ({
 };
 
 export const getTaskServiceById = (taskId, authorId) =>
-  Task.findById({ authorId, _id: taskId }).populate(
+  Task.findOne({ _id: taskId, authorId }).populate(
     'authorId',
     'email createdAt',
   );
@@ -57,25 +57,30 @@ export const getTaskServiceById = (taskId, authorId) =>
 export const addTaskService = taskData => Task.create(taskData);
 
 export const deleteTaskService = (taskId, authorId) =>
-  Task.findByIdAndDelete({ authorId, _id: taskId });
+  Task.findOneAndDelete({ _id: taskId, authorId });
 
-export const updateTaskService = async (id, authorId, taskData, options) => {
-  const result = await Task.findByIdAndUpdate(
-    { authorId, _id: taskId },
+export const updateTaskService = async (
+  taskId,
+  authorId,
+  taskData,
+  options = {},
+) => {
+  const result = await Task.findOneAndUpdate(
+    { _id: taskId, authorId },
     taskData,
     {
-      returnDocument: 'after',
-      includeResultMetadata: true,
+      new: true,
+      runValidators: true,
       ...options,
     },
   );
 
-  if (!result.value) {
+  if (!result) {
     return null;
   }
 
   return {
-    data: result.value,
-    isUpdated: result.lastErrorObject.updatedExisting,
+    data: result,
+    isUpdated: true,
   };
 };
