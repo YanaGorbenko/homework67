@@ -69,18 +69,18 @@ export const updateTaskService = async (
     { _id: taskId, authorId },
     taskData,
     {
-      new: true,
-      runValidators: true,
+      returnDocument: 'after',
+      includeResultMetadata: true,
       ...options,
     },
   );
 
-  if (!result) {
+  if (!result.value) {
     return null;
   }
 
   return {
-    data: result,
-    isUpdated: true,
+    data: result.value,
+    isUpdated: result.lastErrorObject.updatedExisting,
   };
 };
